@@ -17,7 +17,7 @@ Error case:
 >>> try:
 >>>     yield api.testFail()
 >>> except CPAPIException, e:
->>>     print "Got error:", e.xml.getchildren()[0].find("Error").text
+>>>     print "Got error:", e
 
 Should print "Got Error: Failed test command."
 
