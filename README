@@ -38,6 +38,12 @@ Something more interesting, creating a website and watching it get created.
 >>> stepActionID = int(result.find('StepActionID').text)
 >>> yield txHybridCluster.pollStepAction(api, stepActionID)
 
+Locking website.........................FINISHED
+Creating filesystem.....................PENDING
+Applying new configuration..............PENDING
+Installing application..................PENDING
+Unlocking website.......................PENDING
+
 See the full API documentation at http://www.hybrid-cluster.com/api for
 complete details on what you can achieve with the API.
 
