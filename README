@@ -30,7 +30,7 @@ Error case:
 
 Should print "Got Error: Failed test command."
 
-Something more interesting, creating a website and fetching its website ID:
+Something more interesting, creating a website and watching it get created.
 
 >>> result = yield api.addExternalDomain(
 >>>                    Domain='mydomain.com',
