@@ -1,0 +1,30 @@
+A simple Twisted client for interacting with the Hybrid Cluster API as
+documented at http://www.hybrid-cluster.com/api
+
+As per the docstring:
+
+Simple wrapper for the Control Panel XML API, returning responses using the
+ElementTree API.
+
+Smallest working example:
+
+>>> api = CPAPIClient("my.cluster.com", "resellername", "somepass")
+>>> yield api.testSuccess()
+>>> print "Got a successful response from the API"
+
+Error case:
+
+>>> try:
+>>>     yield api.testFail()
+>>> except CPAPIException, e:
+>>>     print "Got error:", e.xml.getchildren()[0].find("Error").text
+
+Should print "Got Error: Failed test command."
+
+Something more interesting, creating a website and fetching its website ID:
+
+>>> websiteID = int((yield api.addExternalDomain(
+>>>                      Domain='mydomain.com',
+>>>                      Type='blank',
+>>>                 )).find('WebsiteID').text)
+
