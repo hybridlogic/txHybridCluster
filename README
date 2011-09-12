@@ -1,30 +1,45 @@
 A simple Twisted client for interacting with the Hybrid Cluster API as
 documented at http://www.hybrid-cluster.com/api
 
-As per the docstring:
+Requirements:
+
+Twisted 11+             http://twistedmatrix.com/
+lxml (recommended)      http://lxml.de/
+
+As per the txHybridCluster.Client docstring:
 
 Simple wrapper for the Control Panel XML API, returning responses using the
 ElementTree API.
 
+The following examples must be executed within a
+defer.inlineCallbacks-decorated function.
+
 Smallest working example:
 
->>> api = CPAPIClient("my.cluster.com", "resellername", "somepass")
->>> yield api.testSuccess()
->>> print "Got a successful response from the API"
+>>> from txHybridCluster import Client
+>>> api = Client("my.cluster.com", "resellername", "somepass")
+>>> xml = yield api.testSuccess()
+>>> print "Got a successful response from the API", utils.tostring(xml)
 
 Error case:
 
 >>> try:
 >>>     yield api.testFail()
->>> except CPAPIException, e:
+>>> except HybridClusterException, e:
 >>>     print "Got error:", e
 
 Should print "Got Error: Failed test command."
 
 Something more interesting, creating a website and fetching its website ID:
 
->>> websiteID = int((yield api.addExternalDomain(
->>>                      Domain='mydomain.com',
->>>                      Type='blank',
->>>                 )).find('WebsiteID').text)
+>>> result = yield api.addExternalDomain(
+>>>                    Domain='mydomain.com',
+>>>                    Type='wordpress')
+>>> stepActionID = int(result.find('StepActionID').text)
+>>> yield txHybridCluster.pollStepAction(api, stepActionID)
+
+See the full API documentation at http://www.hybrid-cluster.com/api for
+complete details on what you can achieve with the API.
+
+Coming soon, libraries for more languages...
 
