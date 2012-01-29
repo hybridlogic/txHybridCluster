@@ -20,14 +20,14 @@ class HybridClusterException(Exception):
                 "\nQuery: " + pprint.pformat(self.query))
 
 
-class ClientClient(object):
+class Client(object):
     """
     Simple wrapper for the Control Panel XML API, returning responses using the
     ElementTree API.
 
     Smallest working example:
 
-    >>> api = ClientClient("my.cluster.com", "resellername", "somepass")
+    >>> api = Client("my.cluster.com", "resellername", "somepass")
     >>> yield api.testSuccess()
     >>> print "Got a successful response from the API"
 
