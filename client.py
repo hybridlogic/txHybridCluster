@@ -15,7 +15,7 @@ class HybridClusterException(Exception):
         self.query = query
 
     def __str__(self):
-        return ("\n    " + str(utils.tostring(self.xml)) +
+        return ("\n    " + (str(self.xml) if isinstance(self.xml, list) else str(utils.tostring(self.xml))) +
                 "\nRunning: " + self.cmd +
                 "\nQuery: " + pprint.pformat(self.query))
 
@@ -48,11 +48,12 @@ class Client(object):
     >>>                 )).find('WebsiteID').text)
     """
 
-    def __init__(self, cpDomain, username, password, apiVersion='1.1'):
+    def __init__(self, cpDomain, username, password, apiVersion='1.1', decodeResponse=False):
         self.endpoint = "http://%s/api/post" % (cpDomain)
         self.username = username
         self.password = password
         self.apiVersion = apiVersion
+        self.decodeResponse = decodeResponse
 
 
     def __getattr__(self, funcname):
@@ -65,11 +66,20 @@ class Client(object):
                         'APIVersion':      self.apiVersion,
                     }
             query.update(kw)
+            if self.decodeResponse:
+                query['ResponseFormat'] = "json"
             d = utils.httpRequest(self.endpoint,
                     query,
                     headers={'Content-Type': ['application/x-www-form-urlencoded']}
                 )
             def parse(xml):
+                if self.decodeResponse:
+                    from simplejson import loads
+                    from simplejson.decoder import JSONDecodeError
+                    try:
+                        return loads(xml)
+                    except JSONDecodeError:
+                        raise Exception("Could not decode JSON '%s'" % xml)
                 try:
                     result = utils.fromstring(xml)
                 except Exception:
@@ -78,8 +88,12 @@ class Client(object):
                 return result
             d.addCallback(parse)
             def checkErrors(xml):
-                if int(xml.find('ErrorCount').text) > 0:
-                    raise HybridClusterException(xml.find('Errors'), command, query)
+                if self.decodeResponse:
+                    if int(xml['ErrorCount'] > 0):
+                        raise HybridClusterException(xml['Errors'], command, query)
+                else:
+                    if int(xml.find('ErrorCount').text) > 0:
+                        raise HybridClusterException(xml.find('Errors'), command, query)
                 return xml
             d.addCallback(checkErrors)
             return d
